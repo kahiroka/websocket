@@ -38,12 +38,17 @@ enum { // operation mode
 	MODE_UNMASK
 };
 
+enum { // opcode
+	OPCODE_TXT = 0x01,
+	OPCODE_BIN = 0x02
+};
+
 void print_usage(char *argv0)
 {
-	fprintf(stderr, "usage: %s -m|u [-k xxxxxxxx] -i input.bin -o output.bin\n", argv0);
+	fprintf(stderr, "usage: %s -t|b -m|u [-k xxxxxxxx] -i input.bin -o output.bin\n", argv0);
 }
 
-void mask(int fdin, int fdout, unsigned char *masking_key)
+void mask(int fdin, int fdout, unsigned char *masking_key, unsigned char opcode)
 {
 	unsigned long long int payload_size, lli;
 	struct stat stat;
@@ -60,7 +65,7 @@ void mask(int fdin, int fdout, unsigned char *masking_key)
 		masking_key[0], masking_key[1], masking_key[2], masking_key[3]);
 
 	header_size = 0;
-	header[header_size++] = 0x82;
+	header[header_size++] = 0x80 | opcode;
 	if (payload_size <= 125) {
 		header[header_size++] = payload_size | 0x80;
 	} else if (payload_size <= 65535) {
@@ -166,12 +171,19 @@ int main(int argc, char *argv[])
 	unsigned char masking_key[] = {0xde, 0xad, 0xbe, 0xef};
 	int fdin = -1, fdout = -1;
 	int opmode = -1;
+	unsigned char opcode = OPCODE_BIN;
 	unsigned char buf[9];
 	unsigned int tmp[4];
 	int ret;
 
-	while ((ret = getopt(argc, argv, "muk:i:o:")) != -1) {
+	while ((ret = getopt(argc, argv, "tbmuk:i:o:")) != -1) {
 		switch(ret) {
+		case 't':
+			opcode = OPCODE_TXT;
+			break;
+		case 'b':
+			opcode = OPCODE_BIN;
+			break;
 		case 'm': 
 			opmode = MODE_MASK;
 			break;
@@ -214,7 +226,7 @@ int main(int argc, char *argv[])
 
 	if (opmode == MODE_MASK) {
 		fprintf(stderr, "masking mode\n");
-		mask(fdin, fdout, masking_key);
+		mask(fdin, fdout, masking_key, opcode);
 	} else {
 		fprintf(stderr, "unmasking mode\n");
 		unmask(fdin, fdout);
