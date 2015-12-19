@@ -131,7 +131,7 @@ void unmask(int fdin, int fdout)
 
 	payload_size = header[0] & 0x7f;
 	if (payload_size <= 125) {
-	} else if (payload_size <= 65535) {
+	} else if (payload_size == 126) {
 		read(fdin, header, 2);
 		payload_size = (unsigned int)header[0] << 8 | header[1];
 	} else {
