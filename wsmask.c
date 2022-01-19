@@ -114,10 +114,11 @@ void unmask(int fdin, int fdout)
 	file_size = stat.st_size;
 
 	read(fdin, header, 1);
-	if (header[0] == 0x82) {
+	if (header[0] == 0x81 || header[0] == 0x82) {
 		//fprintf(stderr, "header[0]: %02x\n", header[0]);
 	} else {
-		fprintf(stderr, "header[0]: %02x (!=0x82)\n", header[0]);
+		fprintf(stderr, "header[0]: %02x (!=0x81,0x82)\n", header[0]);
+		return;
 	}
 
 	read(fdin, header, 1);
@@ -191,9 +192,9 @@ int main(int argc, char *argv[])
 			opmode = MODE_UNMASK;
 			break;
 		case 'k': 
-			strncpy(buf, optarg, 8);
+			strncpy((char *)buf, optarg, 8);
 			buf[8] = '\n';
-			sscanf(buf, "%02x%02x%02x%02x", &tmp[0], &tmp[1], &tmp[2], &tmp[3]);
+			sscanf((char *)buf, "%02x%02x%02x%02x", &tmp[0], &tmp[1], &tmp[2], &tmp[3]);
 			masking_key[0] = tmp[0];
 			masking_key[1] = tmp[1];
 			masking_key[2] = tmp[2];
