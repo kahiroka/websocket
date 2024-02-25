@@ -9,3 +9,8 @@ wsmask -t|b -m|u [-k xxxxxxxx] -i input.bin -o output.bin
     -k xxxxx masking key used with -m option
     -i input.bin
     -o output.bin
+
+You can use the following commands to convert each other.
+
+    $ ./wsmask -u -i sample/masked.bin -o unmasked.bin
+    $ ./wsmask -m -k deadbeef -i sample/unmasked.txt -o masked.bin
